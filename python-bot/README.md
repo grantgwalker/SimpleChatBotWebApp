@@ -28,3 +28,8 @@ JSON Strucutre:
     "message": string,      the content
     "created_at": Timestamp time of message send
 }
+
+create venv: 
+- python -m venv venv
+Activate venv:
+- C:\Users\Your Name> myfirstproject\Scripts\activate
