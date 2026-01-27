@@ -1,8 +1,10 @@
 const express = require("express");
 const axios = require("axios");
 const chatRouter = require("./routes/chat");
+const cors = require("cors");
 
 const app = express();
+app.use(cors()); // enable CORS for all routes for now
 app.use(express.json()); // parse JSON request bodies\
 
 // debugging middleware

@@ -50,6 +50,9 @@ router.get(
 			});
 		}
 
+		console.log(
+			`Fetching conversation for user_id: ${user_id}, session_id: ${session_id}`,
+		);
 		// fetch conversation from database
 		try {
 			const conversation =
@@ -57,6 +60,11 @@ router.get(
 					user_id,
 					session_id,
 				);
+			console.log(
+				`Conversation fetched: ${JSON.stringify(
+					conversation,
+				)}`,
+			);
 			res.json(conversation);
 		} catch (error) {
 			console.error(
