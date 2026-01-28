@@ -1,13 +1,14 @@
-In charge of processing api requests. 
+In charge of processing api requests.
+
 - creates and delivers a response from user input
 
-In scope: 
+In scope:
+
 - user sends message to bot
 - response is sent back to the user
 - user can create new chat sessions
 - user can view previous chat sessions
 - must be pure python
-
 
 | Column     | Purpose                            |
 | ---------- | ---------------------------------- |
@@ -19,17 +20,18 @@ In scope:
 | message    | The text content                   |
 | created_at | Timestamp                          |
 
-JSON Strucutre: 
-{ 
-    "id": string,           primary key
-    "user_id": string,      who owns the chat
-    "session_id": string,   chat grouping
-    "sender": string,       "user" or "bot" 
-    "message": string,      the content
-    "created_at": Timestamp time of message send
+JSON Strucutre:
+{
+"id": string, primary key
+"user_id": string, who owns the chat
+"session_id": string, chat grouping
+"sender": string, "user" or "bot"
+"message": string, the content
+"created_at": Timestamp time of message send
 }
 
-create venv: 
+create venv:
+
 - python -m venv venv
-Activate venv:
-- C:\Users\Your Name> myfirstproject\Scripts\activate
+  Activate venv:
+- .\venv\Scripts\activate

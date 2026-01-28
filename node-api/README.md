@@ -20,6 +20,8 @@ JSON Strucutre:
 "created_at": Timestamp time of message send
 }
 
+start with node index.js
+
 This is a test curl to save a message to the DB
 
 - curl -X POST http://localhost:3000/chat `-H "Content-Type: application/json"` -d "{\"message\":\"Hello\",\"user_id\":\"u1\",\"session_id\":\"s1\"}"
