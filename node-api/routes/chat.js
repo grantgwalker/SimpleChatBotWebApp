@@ -5,6 +5,10 @@ const {
 } = require("../services/python");
 
 const {
+	getGeminiAIResponse,
+} = require("../services/geminiService");
+
+const {
 	saveChatMessageToDB,
 	getConversation,
 	getAllConversations,
@@ -50,9 +54,6 @@ router.get(
 			});
 		}
 
-		console.log(
-			`Fetching conversation for user_id: ${user_id}, session_id: ${session_id}`,
-		);
 		// fetch conversation from database
 		try {
 			const conversation =
@@ -60,11 +61,6 @@ router.get(
 					user_id,
 					session_id,
 				);
-			console.log(
-				`Conversation fetched: ${JSON.stringify(
-					conversation,
-				)}`,
-			);
 			res.json(conversation);
 		} catch (error) {
 			console.error(
@@ -114,6 +110,118 @@ router.get(
 );
 
 // -----------------POST MESSAGES-----------------
+
+router.post("/AI", async (req, res) => {
+	// debugging logs for handler
+	console.log("--- HANDLER LEVEL ---");
+	console.log(
+		`Body: ${JSON.stringify(req.body)}`,
+	);
+
+	// process the incoming message
+	const {
+		message,
+		user_id,
+		session_id,
+	} = req.body;
+
+	// validate user_id
+	if (
+		!user_id ||
+		typeof user_id !== "string"
+	) {
+		return res.status(400).json({
+			error:
+				"user_id must be a nonempty string",
+		});
+	}
+	// validate session_id
+	if (
+		!session_id ||
+		typeof session_id !== "string"
+	) {
+		return res.status(400).json({
+			error:
+				"session_id must be a nonempty string",
+		});
+	}
+
+	// validate message
+	if (
+		!message ||
+		typeof message !== "string" ||
+		message.length === 0
+	) {
+		return res.status(400).json({
+			error:
+				"Message must be a nonempty string",
+		});
+	}
+
+	// save message to database
+	try {
+		await saveChatMessageToDB({
+			user_id,
+			session_id,
+			sender: "user",
+			message,
+		});
+
+		console.log(
+			"User message saved to DB",
+		);
+	} catch (error) {
+		console.error(
+			"Error saving user message to DB:",
+			error,
+		);
+	}
+
+	// send message to AI bot
+	try {
+		const response =
+			await getGeminiAIResponse(
+				user_id,
+				session_id,
+				"user",
+				message,
+			);
+
+		const textResponse =
+			response.response.text();
+
+		// save bot response to database
+		try {
+			await saveChatMessageToDB({
+				user_id,
+				session_id,
+				message: textResponse,
+				sender: "bot",
+			});
+			console.log(
+				"Bot message saved to DB",
+			);
+		} catch (error) {
+			console.error(
+				"Error saving bot message to DB:",
+				error,
+			);
+		}
+
+		// respond to client
+		res.json({
+			response: textResponse,
+		});
+	} catch (error) {
+		console.error(
+			"Error communicating with AI:",
+			error,
+		);
+		res.status(500).json({
+			error: "Internal server error",
+		});
+	}
+});
 
 router.post("/", async (req, res) => {
 	// debugging logs for handler

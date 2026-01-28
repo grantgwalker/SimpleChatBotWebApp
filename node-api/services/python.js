@@ -1,8 +1,6 @@
 const axios = require("axios");
-
-const PYTHON_SERVICE_URL =
-	"http://127.0.0.1:8000/chat";
-const TIMOUT_MS = 5000;
+const { response } = require("express");
+require("dotenv").config();
 
 async function sendMessageToPythonBot(
 	message,
@@ -11,12 +9,15 @@ async function sendMessageToPythonBot(
 		new AbortController();
 	const timeout = setTimeout(
 		() => controller.abort(),
-		TIMOUT_MS,
+		process.env.TIMEOUT_MS,
 	);
+
+	const bot_error_response =
+		"I am unavailable right now. Please try again later.";
 
 	try {
 		const response = await axios.post(
-			PYTHON_SERVICE_URL,
+			process.env.PYTHON_SERVICE_URL,
 			{ message },
 			{ signal: controller.signal },
 		);
@@ -32,9 +33,7 @@ async function sendMessageToPythonBot(
 			"Error communicating with Python bot:",
 			error,
 		);
-		throw new Error(
-			"Failed to communicate with Python bot",
-		);
+		return bot_error_response;
 	} finally {
 		clearTimeout(timeout);
 	}
