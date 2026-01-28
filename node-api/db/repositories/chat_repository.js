@@ -53,7 +53,7 @@ async function getConversation(
 			user_id,
 			session_id,
 		})
-		.orderBy("timestamp", "asc");
+		.orderBy("timestamp", "desc");
 
 	return messages;
 }
