@@ -1,8 +1,43 @@
 const axios = require("axios");
+const { response } = require("express");
+require("dotenv").config();
 
-const PYTHON_SERVICE_URL =
-	"http://127.0.0.1:8000/chat";
-const TIMOUT_MS = 5000;
+async function sendMessageToPythonAIBot(
+	message,
+) {
+	const controller =
+		new AbortController();
+	const timeout = setTimeout(
+		() => controller.abort(),
+		process.env.TIMEOUT_MS,
+	);
+
+	const bot_error_response =
+		"I am unavailable right now. Please try again later.";
+
+	try {
+		response = await axios.post(
+			process.env.PYTHON_SERVICE_URL_AI,
+			{ message },
+			{ signal: controller.signal },
+		);
+
+		if (!response) {
+			throw new Error(
+				`Python service error: ${response}`,
+			);
+		}
+		return response.data;
+	} catch (error) {
+		console.error(
+			"Error communicating with Python AI bot:",
+			error,
+		);
+		return bot_error_response;
+	} finally {
+		clearTimeout(timeout);
+	}
+}
 
 async function sendMessageToPythonBot(
 	message,
@@ -11,12 +46,15 @@ async function sendMessageToPythonBot(
 		new AbortController();
 	const timeout = setTimeout(
 		() => controller.abort(),
-		TIMOUT_MS,
+		process.env.TIMEOUT_MS,
 	);
+
+	const bot_error_response =
+		"I am unavailable right now. Please try again later.";
 
 	try {
 		const response = await axios.post(
-			PYTHON_SERVICE_URL,
+			process.env.PYTHON_SERVICE_URL,
 			{ message },
 			{ signal: controller.signal },
 		);
@@ -32,9 +70,7 @@ async function sendMessageToPythonBot(
 			"Error communicating with Python bot:",
 			error,
 		);
-		throw new Error(
-			"Failed to communicate with Python bot",
-		);
+		return bot_error_response;
 	} finally {
 		clearTimeout(timeout);
 	}
@@ -42,4 +78,5 @@ async function sendMessageToPythonBot(
 
 module.exports = {
 	sendMessageToPythonBot,
+	sendMessageToPythonAIBot,
 };

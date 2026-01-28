@@ -1,3 +1,6 @@
+const PORT = 4000;
+const API_BASE_URL = `http://localhost:${PORT}`;
+
 const chatwindow =
 	document.getElementById(
 		"chat-window",
@@ -47,7 +50,7 @@ async function fetchConversationHistory() {
 	);
 	try {
 		const response = await fetch(
-			`http://localhost:3000/chat/conversation?user_id=${userID}&session_id=${sessionId}`,
+			`${API_BASE_URL}/chat/conversation?user_id=${userID}&session_id=${sessionId}`,
 		);
 		console.log(
 			"Response received for conversation history",
@@ -67,6 +70,11 @@ async function fetchConversationHistory() {
 			"Error fetching conversation history:",
 			error,
 		);
+
+		renderMessage(
+			"Error loading conversation history.",
+			"bot",
+		);
 	}
 }
 
@@ -81,7 +89,7 @@ async function sendMessage() {
 
 	try {
 		const response = await fetch(
-			"http://localhost:3000/chat",
+			`${API_BASE_URL}/chat`,
 			{
 				method: "POST",
 				headers: {
@@ -103,6 +111,10 @@ async function sendMessage() {
 		console.error(
 			"Error sending message:",
 			error,
+		);
+		renderMessage(
+			"Sorry, I am having issues right now. Please try again.",
+			"bot",
 		);
 	}
 
