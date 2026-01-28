@@ -45,20 +45,13 @@ function renderMessage(
 
 // Fetch conversation history from the server
 async function fetchConversationHistory() {
-	console.log(
-		"Fetching conversation history...",
-	);
 	try {
 		const response = await fetch(
 			`${API_BASE_URL}/chat/conversation?user_id=${userID}&session_id=${sessionId}`,
 		);
-		console.log(
-			"Response received for conversation history",
-		);
+
 		const data = await response.json();
-		console.log(
-			`This is the parsed JSON of the conversation history: ${JSON.stringify(data)}`,
-		);
+
 		data.forEach((msg) => {
 			renderMessage(
 				msg.message,
@@ -89,7 +82,7 @@ async function sendMessage() {
 
 	try {
 		const response = await fetch(
-			`${API_BASE_URL}/chat`,
+			`${API_BASE_URL}/chat/AI`,
 			{
 				method: "POST",
 				headers: {

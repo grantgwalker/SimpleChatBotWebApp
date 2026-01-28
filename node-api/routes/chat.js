@@ -5,6 +5,10 @@ const {
 } = require("../services/python");
 
 const {
+	getGeminiAIResponse,
+} = require("../services/geminiService");
+
+const {
 	saveChatMessageToDB,
 	getConversation,
 	getAllConversations,
@@ -50,9 +54,6 @@ router.get(
 			});
 		}
 
-		console.log(
-			`Fetching conversation for user_id: ${user_id}, session_id: ${session_id}`,
-		);
 		// fetch conversation from database
 		try {
 			const conversation =
@@ -60,11 +61,6 @@ router.get(
 					user_id,
 					session_id,
 				);
-			console.log(
-				`Conversation fetched: ${JSON.stringify(
-					conversation,
-				)}`,
-			);
 			res.json(conversation);
 		} catch (error) {
 			console.error(
@@ -181,19 +177,25 @@ router.post("/AI", async (req, res) => {
 		);
 	}
 
-	// send message to Python bot
+	// send message to AI bot
 	try {
-		const { response } =
-			await sendMessageToPythonBot(
+		const response =
+			await getGeminiAIResponse(
+				user_id,
+				session_id,
+				"user",
 				message,
 			);
+
+		const textResponse =
+			response.response.text();
 
 		// save bot response to database
 		try {
 			await saveChatMessageToDB({
 				user_id,
 				session_id,
-				message: response,
+				message: textResponse,
 				sender: "bot",
 			});
 			console.log(
@@ -207,10 +209,12 @@ router.post("/AI", async (req, res) => {
 		}
 
 		// respond to client
-		res.json({ response });
+		res.json({
+			response: textResponse,
+		});
 	} catch (error) {
 		console.error(
-			"Error communicating with Python bot:",
+			"Error communicating with AI:",
 			error,
 		);
 		res.status(500).json({
