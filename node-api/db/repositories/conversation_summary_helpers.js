@@ -1,5 +1,6 @@
 const db = require("../knex");
 
+// Fetches the summary for a given user and session
 async function getSummary(
 	user_id,
 	session_id,
@@ -11,6 +12,7 @@ async function getSummary(
 		.first();
 }
 
+// Inserts or updates the summary for a given user and session
 async function upsertSummary(
 	user_id,
 	session_id,

@@ -38,20 +38,24 @@ async function getGeminiAIResponse(
 	 *  ]
 	 *
 	 */
+
+	// build the prompt with system instructions and context
 	const systemPrompt =
 		"You are a helpful AI assistant on the web. \n\n";
 	const context = await getContext(
 		user_id,
 		session_id,
 	);
-
+	// final prompt to send to the model
 	const prompt = `${systemPrompt} ${sender}: ${message} \n\nContext:\n${context}`;
 
+	// generate response from the AI model
 	const result =
 		await model.generateContent(prompt);
 	return result;
 }
 
+// summarizes the given messages using the AI model
 async function summarizeConversation(
 	messages,
 ) {
@@ -77,6 +81,7 @@ async function summarizeConversation(
 	return summaryResult;
 }
 
+// builds the context for the AI model
 async function getContext(
 	user_id,
 	session_id,
@@ -86,19 +91,23 @@ async function getContext(
 		session_id,
 	);
 
+	// check if we need to summarize and upserts if needed
 	await determineSummary(
 		user_id,
 		session_id,
 		entireSession,
 	);
 
+	// get updated summary after possible upsert
 	const summary = await getSummary(
 		user_id,
 		session_id,
 	);
 
+	// build context with recent messages and summary
 	context = [];
 
+	// get recent messages
 	messagesBeforeSummarization =
 		entireSession.slice(
 			0,
@@ -114,6 +123,7 @@ async function getContext(
 		"Using summary:",
 		!!summary,
 	);
+	// include summary in the context if it exists
 	if (summary) {
 		context.push({
 			sender: "system",
@@ -126,6 +136,7 @@ async function getContext(
 		context.length,
 	);
 
+	// format messages for context for the prompt
 	let messagesForContext = context
 		.map(
 			(msg) =>
@@ -147,6 +158,8 @@ async function getContext(
 	return messagesForContext;
 }
 
+// decides whether to summarize the conversation
+// and performs the summarization and upserts if needed
 async function determineSummary(
 	user_id,
 	session_id,
