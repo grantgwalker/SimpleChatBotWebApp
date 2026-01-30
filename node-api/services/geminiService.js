@@ -3,7 +3,7 @@ const {
 	GoogleGenerativeAI,
 } = require("@google/generative-ai");
 const {
-	getConversation,
+	getConversationDesc,
 } = require("../db/repositories/chat_repository");
 const {
 	getSummary,
@@ -15,7 +15,7 @@ const genAI = new GoogleGenerativeAI(
 );
 
 const model = genAI.getGenerativeModel({
-	model: "gemini-2.5-flash-lite",
+	model: "gemini-2.5-flash",
 });
 
 async function getGeminiAIResponse(
@@ -47,8 +47,10 @@ async function getGeminiAIResponse(
 		session_id,
 	);
 	// final prompt to send to the model
-	const prompt = `${systemPrompt} ${sender}: ${message} \n\nContext:\n${context}`;
+	// \n\nHere is previous chat history for context:\n${context}
+	const prompt = `${systemPrompt} Please answer the following message from the user: ${sender}: ${message} \n\nHere is previous chat history for context:\n${context}`;
 
+	console.log("Final Prompt:", prompt);
 	// generate response from the AI model
 	const result =
 		await model.generateContent(prompt);
@@ -86,10 +88,11 @@ async function getContext(
 	user_id,
 	session_id,
 ) {
-	entireSession = await getConversation(
-		user_id,
-		session_id,
-	);
+	entireSession =
+		await getConversationDesc(
+			user_id,
+			session_id,
+		);
 
 	// check if we need to summarize and upserts if needed
 	await determineSummary(
@@ -131,11 +134,6 @@ async function getContext(
 		});
 	}
 
-	console.log(
-		"Context size:",
-		context.length,
-	);
-
 	// format messages for context for the prompt
 	let messagesForContext = context
 		.map(
@@ -143,17 +141,6 @@ async function getContext(
 				`${msg.sender}: ${msg.message}`,
 		)
 		.join("\n");
-
-	console.log(
-		"Messages before summarization:",
-		messagesBeforeSummarization,
-	);
-	console.log(
-		"Summary:",
-		summary
-			? summary.summary
-			: "No summary",
-	);
 
 	return messagesForContext;
 }
@@ -180,11 +167,6 @@ async function determineSummary(
 				process.env
 					.CHAT_SUMMARY_THRESHOLD,
 			);
-
-		console.log(
-			"Messages to summarize:",
-			messagesToSummarize,
-		);
 
 		messagesToSummarizeFormatted =
 			messagesToSummarize

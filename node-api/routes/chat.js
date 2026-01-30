@@ -10,7 +10,7 @@ const {
 
 const {
 	saveChatMessageToDB,
-	getConversation,
+	getConversationAsc,
 	getAllConversations,
 } = require("../db/repositories/chat_repository");
 
@@ -57,7 +57,7 @@ router.get(
 		// fetch conversation from database
 		try {
 			const conversation =
-				await getConversation(
+				await getConversationAsc(
 					user_id,
 					session_id,
 				);

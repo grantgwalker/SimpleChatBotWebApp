@@ -34,9 +34,37 @@ async function saveChatMessageToDB({
 		sender,
 		message,
 	});
+
+	await db("chat_sessions")
+		.where({ id: session_id })
+		.update({
+			updated_at: db.fn.now(),
+		});
 }
 
-async function getConversation(
+async function getConversationAsc(
+	user_id,
+	session_id,
+) {
+	// validate required fields
+	if (!user_id || !session_id) {
+		throw new Error(
+			"Missing required fields",
+		);
+	}
+
+	// fetch all chat messages for the given user and session
+	const messages = await db("chats")
+		.where({
+			user_id,
+			session_id,
+		})
+		.orderBy("timestamp", "asc");
+
+	return messages;
+}
+
+async function getConversationDesc(
 	user_id,
 	session_id,
 ) {
@@ -80,6 +108,7 @@ async function getAllConversations(
 
 module.exports = {
 	saveChatMessageToDB,
-	getConversation,
+	getConversationAsc,
+	getConversationDesc,
 	getAllConversations,
 };
